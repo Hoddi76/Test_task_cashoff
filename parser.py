@@ -18,8 +18,8 @@ def get_auth(start_url, auth_url, login, password):
 
     session = requests.Session()
     session.headers.update({
-                               "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, "
-                                             "like Gecko) Chrome/73.0.3683.103 Safari/537.36 OPR/60.0.3255.69"})
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, "
+                      "like Gecko) Chrome/73.0.3683.103 Safari/537.36 OPR/60.0.3255.69"})
 
     form_data = dict(
         AUTH_FORM='Y',
@@ -55,6 +55,7 @@ def get_personal_data(session, url):
     state = soup.find(attrs={'name': "PERSONAL_STATE"}).find_next(selected=True).text
     city = soup.find(attrs={'name': "PERSONAL_CITY"}).find_next(selected=True).text
     card_number = soup.find(attrs={'class': 'personal-card__number'}).text
+    print(soup.find(attrs={'class': 'personal-card__number'}))
 
     personal_data = {
         'имя': name,
@@ -77,43 +78,51 @@ def get_favorite_product(session, url):
     r = session.get(url)
     soup = BeautifulSoup(r.text, 'lxml')
 
-    products_catalog = soup.find('div', attrs={'id': 'catalog_sect_cont'}).find_all('div', attrs={
-        'class': 'main-list__card-item '})
-    for product in products_catalog:
-        product_name = product.find('a', attrs={'class': 'product-card__title'}).text.strip()
-        link = 'https://fix-price.ru' + product.find('a', attrs={'class': 'product-card__title'}).get('href')
-        price = product.find('span', attrs={'class': 'badge-price-value'}).get('data-price') + ' руб'
+    try:
+        products_catalog = soup.find('div', attrs={'id': 'catalog_sect_cont'}).find_all('div', attrs={
+            'class': 'main-list__card-item '})
+        for product in products_catalog:
+            product_name = product.find('a', attrs={'class': 'product-card__title'}).text.strip()
+            link = 'https://fix-price.ru' + product.find('a', attrs={'class': 'product-card__title'}).get('href')
+            price = product.find('span', attrs={'class': 'badge-price-value'}).get('data-price') + ' руб'
 
-        product_data = {
-            'Название': product_name,
-            'Ссылка': link,
-            'Цена': price
-        }
+            product_data = {
+                'Название': product_name,
+                'Ссылка': link,
+                'Цена': price
+            }
 
-        products_data.append(product_data)
+            products_data.append(product_data)
+    except:
+        products_data = None
     return products_data
 
 
 def get_promotions(session, url):
     r = session.get(url)
     soup = BeautifulSoup(r.text, 'lxml')
-
-    user_points_active = soup.find(attrs={'class': 'client-points__active'}).text
-    user_points_inactive = soup.find(attrs={'class': 'inactive-points'}).text.strip('+')
+    try:
+        user_points_active = soup.find(attrs={'class': 'client-points__active'}).text
+        user_points_inactive = soup.find(attrs={'class': 'inactive-points'}).text.strip('+')
+    except:
+        user_points_active = None
+        user_points_inactive = None
 
     user_point = dict(point_active=user_points_active, point_inactive=user_points_inactive)
     promotions_list = []
+    try:
+        action_cards = soup.find_all(attrs={'class': 'action-block__item '})
+        for action_card in action_cards:
+            name = action_card.find(attrs={'class', 'action-card__desc-title'}).text.strip()
+            description = action_card.find(attrs={'class': 'action-card__info'}).find('div').text.strip()
 
-    action_cards = soup.find_all(attrs={'class': 'action-block__item '})
-    for action_card in action_cards:
-        name = action_card.find(attrs={'class', 'action-card__desc-title'}).text.strip()
-        description = action_card.find(attrs={'class': 'action-card__info'}).find('div').text.strip()
-
-        action_items = {
-            'Название': name,
-            'Описание': description,
-        }
-        promotions_list.append(action_items)
+            action_items = {
+                'Название': name,
+                'Описание': description,
+            }
+            promotions_list.append(action_items)
+    except:
+        promotions_list = None
     return user_point, promotions_list
 
 
