@@ -31,17 +31,16 @@ def get_auth(start_url, auth_url):
         login=login.strip(),
         password=password.strip()
     )
-    #
+
     session.get(start_url)
     auth = session.post(auth_url, data=form_data, timeout=15)
 
     response = auth.text
     dict_resp = eval(response)
-    print(response)
+
     # Если авторизация не успешна печатаем сообщение ответа сервера и вызываем функцию заного
     # Пример ответа сервера: {"res":1} - авторизация прошла успешно.
     if dict_resp['res'] != 1:
-        print(dict_resp['mess'])
         return get_auth(START_URL, AUTH_URL)
 
     return session
@@ -67,7 +66,6 @@ def get_personal_data(session, url):
     state = soup.find(attrs={'name': "PERSONAL_STATE"}).find_next(selected=True).text
     city = soup.find(attrs={'name': "PERSONAL_CITY"}).find_next(selected=True).text
     card_number = soup.find(attrs={'class': 'personal-card__number'}).text
-    print(soup.find(attrs={'class': 'personal-card__number'}))
 
     personal_data = {
         'имя': name,
