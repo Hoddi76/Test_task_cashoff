@@ -80,7 +80,7 @@ def get_favorite_product(session, url):
 
     try:
         products_catalog = soup.find('div', attrs={'id': 'catalog_sect_cont'}).find_all('div', attrs={
-            'class': 'main-list__card-item '})
+            'class': 'main-list__card-item'})
         for product in products_catalog:
             product_name = product.find('a', attrs={'class': 'product-card__title'}).text.strip()
             link = 'https://fix-price.ru' + product.find('a', attrs={'class': 'product-card__title'}).get('href')
@@ -111,7 +111,7 @@ def get_promotions(session, url):
     user_point = dict(point_active=user_points_active, point_inactive=user_points_inactive)
     promotions_list = []
     try:
-        action_cards = soup.find_all(attrs={'class': 'action-block__item '})
+        action_cards = soup.find_all(attrs={'class': 'action-block__item'})
         for action_card in action_cards:
             name = action_card.find(attrs={'class', 'action-card__desc-title'}).text.strip()
             description = action_card.find(attrs={'class': 'action-card__info'}).find('div').text.strip()
