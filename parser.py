@@ -11,10 +11,13 @@ PROMOTIONS_URL = 'https://fix-price.ru/personal/'
 AUTH_URL = 'https://fix-price.ru/ajax/auth_user.php'
 
 
-def get_auth(start_url, auth_url, login, password):
+def get_auth(start_url, auth_url):
     """
     Open session and login
     """
+
+    login = input('Введите адрес электронной почты или номер телефона в формате: +7xxx xxx xxxx: ')
+    password = input('Введите пароль: ')
 
     session = requests.Session()
     session.headers.update({
@@ -30,7 +33,16 @@ def get_auth(start_url, auth_url, login, password):
     )
     #
     session.get(start_url)
-    login = session.post(auth_url, data=form_data, timeout=15)
+    auth = session.post(auth_url, data=form_data, timeout=15)
+
+    response = auth.text
+    dict_resp = eval(response)
+    print(response)
+    # Если авторизация не успешна печатаем сообщение ответа сервера и вызываем функцию заного
+    # Пример ответа сервера: {"res":1} - авторизация прошла успешно.
+    if dict_resp['res'] != 1:
+        print(dict_resp['mess'])
+        return get_auth(START_URL, AUTH_URL)
 
     return session
 
@@ -143,10 +155,8 @@ def write_json(item):
 
 
 if __name__ == '__main__':
-    login = input('Введите адрес электронной почты или номер телефона в формате: +7xxx xxx xxxx: ')
-    password = input('Введите пароль: ')
 
-    session = get_auth(START_URL, AUTH_URL, login, password)
+    session = get_auth(START_URL, AUTH_URL)
     personal_data = get_personal_data(session, PERSONAL_INFO_URL)
     favorite_products = get_favorite_product(session, FAVORITE_PRODUCTS_URL)
     promotions = get_promotions(session, PROMOTIONS_URL)
